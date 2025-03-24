@@ -20,7 +20,7 @@ func main() {
 	g := gin.Default()
 
 	// подключаемся к базе данных
-	d, err := db.GetDb(c)
+	d, err := db.GetDB(c)
 	if err != nil {
 		panic(err)
 	}
@@ -38,12 +38,12 @@ func main() {
 	g.Use(gin.Logger())
 
 	// добавили в начале /api/user
-	clientApi := g.Group(c.GetEnvVariables().RootUrl)
+	clientAPI := g.Group(c.GetEnvVariables().RootURL)
 
-	clientApi.POST("/register", h.Register)
-	clientApi.POST("/login", h.Login)
+	clientAPI.POST("/register", h.Register)
+	clientAPI.POST("/login", h.Login)
 
-	protected := g.Group(c.GetEnvVariables().RootUrl)
+	protected := g.Group(c.GetEnvVariables().RootURL)
 	protected.Use(middleware.Auth(c, d))
 	{
 		protected.POST("/orders", h.PostOrders)

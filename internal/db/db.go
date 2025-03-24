@@ -35,7 +35,7 @@ type DBI interface {
 	PostOrderWithDraw(withdrawal *models.DBWithdrawal) *models.Error
 }
 
-func GetDb(conf config.ConfigI) (DBI, *models.Error) {
+func GetDB(conf config.ConfigI) (DBI, *models.Error) {
 	//dsn := "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
 	db, err := gorm.Open(postgres.Open(conf.GetEnvVariables().DataBaseURL), &gorm.Config{})
 	if err != nil {

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/rtmelsov/GopherMart/internal/config"
@@ -10,6 +11,45 @@ import (
 	"log"
 	"net/http"
 )
+
+func PostAccrual(conf config.ConfigI, num string) *models.Error {
+	var order = struct {
+		Order string `json:"order"`
+	}{
+		Order: num,
+	}
+	reqBody, err := json.Marshal(order)
+	if err != nil {
+		conf.GetLogger().Error("error to try check order number to luhn algorithm", zap.Error(err))
+		return &models.Error{
+			Error: err.Error(),
+			Code:  http.StatusUnprocessableEntity,
+		}
+	}
+
+	conf.GetLogger().Info("check accrual", zap.String("AccrualSystemAddress", conf.GetEnvVariables().AccrualSystemAddress))
+	resp, err := http.Post(fmt.Sprintf("%s/api/orders", conf.GetEnvVariables().AccrualSystemAddress), "application/json", bytes.NewBuffer(reqBody))
+	if err != nil {
+		conf.GetLogger().Error("error to get resp from post accrual", zap.Error(err))
+		return &models.Error{
+			Error: err.Error(),
+			Code:  http.StatusUnprocessableEntity,
+		}
+	}
+	defer func() {
+		err := resp.Body.Close()
+		conf.GetLogger().Error("post api order error", zap.Error(err))
+	}()
+	if resp.StatusCode != http.StatusConflict && resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+		conf.GetLogger().Error("Accrual error", zap.Int("error while checking status", resp.StatusCode))
+		return &models.Error{
+			Error: "",
+			Code:  http.StatusUnprocessableEntity,
+		}
+	}
+
+	return nil
+}
 
 func GetAccrual(conf config.ConfigI, num string) (*models.Accrual, *models.Error) {
 	var order models.Accrual
@@ -29,6 +69,12 @@ func GetAccrual(conf config.ConfigI, num string) (*models.Accrual, *models.Error
 	}()
 
 	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, &models.Error{
+			Error: err.Error(),
+			Code:  http.StatusInternalServerError,
+		}
+	}
 	conf.GetLogger().Info("body from accrual", zap.String("body", string(body)))
 	err = json.Unmarshal(body, &order)
 	if err != nil {
