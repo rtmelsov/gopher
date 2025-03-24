@@ -65,6 +65,12 @@ func GetAccrual(conf config.ConfigI, num string) (*models.Accrual, *models.Error
 	}()
 
 	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, &models.Error{
+			Error: err.Error(),
+			Code:  http.StatusInternalServerError,
+		}
+	}
 	conf.GetLogger().Info("body from accrual", zap.String("body", string(body)))
 	err = json.Unmarshal(body, &order)
 	if err != nil {
