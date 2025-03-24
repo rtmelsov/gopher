@@ -19,9 +19,9 @@ func (s *Service) PostOrders(order *models.DBOrder) *models.Error {
 	}
 
 	s.conf.GetLogger().Info("try to get order if exist", zap.String("order number: ", order.Number))
-	isValid := utils.Valid(order.Number)
-	if !isValid {
-		return s.ErrorHandler("order number is not valid", http.StatusUnprocessableEntity)
+	localError = utils.PostAccrual(s.conf, order.Number)
+	if localError != nil {
+		return localError
 	}
 
 	if oldOrder != nil {
