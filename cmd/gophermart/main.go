@@ -38,12 +38,12 @@ func main() {
 	g.Use(gin.Logger())
 
 	// добавили в начале /api/user
-	clientAPI := g.Group(c.GetEnvVariables().RootUrl)
+	clientAPI := g.Group(c.GetEnvVariables().RootURL)
 
 	clientAPI.POST("/register", h.Register)
 	clientAPI.POST("/login", h.Login)
 
-	protected := g.Group(c.GetEnvVariables().RootUrl)
+	protected := g.Group(c.GetEnvVariables().RootURL)
 	protected.Use(middleware.Auth(c, d))
 	{
 		protected.POST("/orders", h.PostOrders)
