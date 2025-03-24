@@ -20,7 +20,7 @@ func main() {
 	g := gin.Default()
 
 	// подключаемся к базе данных
-	d, err := db.GetDb(c)
+	d, err := db.GetDB(c)
 	if err != nil {
 		panic(err)
 	}
