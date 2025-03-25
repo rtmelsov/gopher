@@ -1,15 +1,13 @@
 package utils
 
 import (
-	"github.com/rtmelsov/GopherMart/internal/models"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
 )
 
-func HashPassword(password string) ([]byte, *models.Error) {
+func HashPassword(password string) ([]byte, error) {
 	res, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, Error(err, http.StatusInternalServerError)
+		return nil, err
 	}
 	return res, nil
 }

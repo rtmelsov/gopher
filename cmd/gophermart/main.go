@@ -12,11 +12,12 @@ import (
 
 func main() {
 	// получили все перемененные окружения
-	c, err := config.InitConfig()
-	if err != nil {
-		panic(err)
+	c, localError := config.InitConfig()
+	if localError != nil {
+		panic(localError)
 	}
 
+	// init gin router
 	g := gin.Default()
 
 	// подключаемся к базе данных

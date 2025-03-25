@@ -2,7 +2,6 @@ package db
 
 import (
 	"github.com/rtmelsov/GopherMart/internal/models"
-	"github.com/rtmelsov/GopherMart/internal/utils"
 	"net/http"
 )
 
@@ -17,7 +16,7 @@ func (db *DB) GetBalance(id *uint) (*models.Balance, *models.Error) {
 	}
 
 	return &models.Balance{
-		Current:   utils.ToFixed(user.Current, 4),
-		Withdrawn: utils.ToFixed(user.Withdrawn, 4),
+		Current:   user.Current,
+		Withdrawn: user.Withdrawn,
 	}, nil
 }

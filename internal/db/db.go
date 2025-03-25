@@ -3,10 +3,8 @@ package db
 import (
 	"github.com/rtmelsov/GopherMart/internal/config"
 	"github.com/rtmelsov/GopherMart/internal/models"
-	"github.com/rtmelsov/GopherMart/internal/utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"net/http"
 	"sync"
 )
 
@@ -35,20 +33,24 @@ type DBI interface {
 	PostOrderWithDraw(withdrawal *models.DBWithdrawal) *models.Error
 }
 
-func GetDB(conf config.ConfigI) (DBI, *models.Error) {
+func (db *DB) ErrorHandler(err string, code int) *models.Error {
+	return db.conf.ErrorHandler("DB", err, code)
+}
+
+func GetDB(conf config.ConfigI) (DBI, error) {
 	//dsn := "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
 	db, err := gorm.Open(postgres.Open(conf.GetEnvVariables().DataBaseURL), &gorm.Config{})
 	if err != nil {
-		return nil, utils.Error(err, http.StatusInternalServerError)
+		return nil, err
 	}
 
 	err = db.Migrator().DropTable(&models.DBUser{}, &models.DBOrder{}, &models.DBWithdrawal{})
 	if err != nil {
-		return nil, utils.Error(err, http.StatusInternalServerError)
+		return nil, err
 	}
 	err = db.AutoMigrate(&models.DBUser{}, &models.DBOrder{}, &models.DBWithdrawal{})
 	if err != nil {
-		return nil, utils.Error(err, http.StatusInternalServerError)
+		return nil, err
 	}
 
 	return &DB{

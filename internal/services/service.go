@@ -25,6 +25,10 @@ type ServiceI interface {
 	GetBalance(id *uint) (*models.Balance, *models.Error)
 }
 
+func (s *Service) ErrorHandler(err string, code int) *models.Error {
+	return s.conf.ErrorHandler("SERVICES", err, code)
+}
+
 func NewService(conf config.ConfigI, r repository.RepositoryI) ServiceI {
 	return &Service{
 		conf: conf,

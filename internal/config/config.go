@@ -18,14 +18,23 @@ type Config struct {
 type ConfigI interface {
 	GetLogger() *zap.Logger
 	GetEnvVariables() *models.EnvVariables
+	ErrorHandler(origin, err string, code int) *models.Error
 }
 
-func (c Config) GetLogger() *zap.Logger {
+func (c *Config) GetLogger() *zap.Logger {
 	return c.Logger
 }
 
-func (c Config) GetEnvVariables() *models.EnvVariables {
+func (c *Config) GetEnvVariables() *models.EnvVariables {
 	return c.EnvVariables
+}
+
+func (c *Config) ErrorHandler(origin, err string, code int) *models.Error {
+	c.GetLogger().Error(origin, zap.String("ERROR TEXT", err), zap.Int("ERROR CODE", code))
+	return &models.Error{
+		Error: err,
+		Code:  code,
+	}
 }
 
 func InitConfig() (ConfigI, *models.Error) {
@@ -68,7 +77,7 @@ func InitConfig() (ConfigI, *models.Error) {
 	// Build the logger
 	Log := zap.New(core, zap.AddCaller())
 
-	return Config{
+	return &Config{
 		Logger:       Log,
 		EnvVariables: &envVar,
 	}, nil

@@ -3,23 +3,24 @@ package services
 import (
 	"github.com/rtmelsov/GopherMart/internal/models"
 	"github.com/rtmelsov/GopherMart/internal/utils"
+	"net/http"
 )
 
 func (s *Service) Register(t *models.User) (*models.UserResponse, *models.Error) {
 	password, err := utils.HashPassword(t.Password)
 	if err != nil {
-		return nil, err
+		return nil, s.ErrorHandler(err.Error(), http.StatusInternalServerError)
 	}
 	t.Password = string(password)
 
-	user, err := s.repo.Register(t)
-	if err != nil {
-		return nil, err
+	user, localErr := s.repo.Register(t)
+	if localErr != nil {
+		return nil, localErr
 	}
 
-	tokenString, err := utils.GetToken(user.ID, s.conf.GetEnvVariables().Secret)
-	if err != nil {
-		return nil, err
+	tokenString, localErr := utils.GetToken(user.ID, s.conf.GetEnvVariables().Secret)
+	if localErr != nil {
+		return nil, localErr
 	}
 
 	return &models.UserResponse{

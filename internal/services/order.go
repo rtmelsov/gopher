@@ -1,8 +1,8 @@
 package services
 
 import (
+	"github.com/rtmelsov/GopherMart/internal/external"
 	"github.com/rtmelsov/GopherMart/internal/models"
-	"github.com/rtmelsov/GopherMart/internal/utils"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -19,7 +19,7 @@ func (s *Service) PostOrders(order *models.DBOrder) *models.Error {
 	}
 
 	s.conf.GetLogger().Info("try to get order if exist", zap.String("order number: ", order.Number))
-	localError = utils.PostAccrual(s.conf, order.Number)
+	localError = external.PostAccrual(s.conf, order.Number)
 	if localError != nil {
 		return localError
 	}
@@ -33,7 +33,7 @@ func (s *Service) PostOrders(order *models.DBOrder) *models.Error {
 		zap.String("DataBaseURL: ", s.conf.GetEnvVariables().DataBaseURL),
 		zap.String("RunAddress: ", s.conf.GetEnvVariables().RunAddress),
 	)
-	orderWithStatus, localError = utils.GetAccrual(s.conf, order.Number)
+	orderWithStatus, localError = external.GetAccrual(s.conf, order.Number)
 
 	order.Status = orderWithStatus.Status
 	order.Accrual = &orderWithStatus.Accrual
